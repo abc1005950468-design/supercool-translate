@@ -24,13 +24,19 @@
 ## 新机器恢复
 
 1. 配置 JDK 17 和 Android SDK。
-2. 下载内置语音模型：
+2. 恢复 AAR、ONNX Runtime 和 OCR 语言包：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/fetch-dependencies.ps1
+```
+
+3. 下载内置语音模型：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/fetch-bundled-models.ps1
 ```
 
-3. 构建：
+4. 构建：
 
 ```powershell
 gradle -p android testDebugUnitTest assembleDebug
@@ -46,3 +52,15 @@ gradle -p android testDebugUnitTest assembleDebug
 4. 发布可重复构建的 arm64 侧载 APK。
 
 详细状态见 [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，协作规则见 [AGENTS.md](AGENTS.md)。
+
+`android/app/build/outputs/apk/debug/app-debug.apk`。
+
+## 当前优先事项
+
+1. 修复 Nubia NX769J 上本地 NLLB 单句翻译触发系统 `SIGKILL` 的问题。
+2. 验证 API Key 自动保存、切换离线和重启后的持久化。
+3. 完成连续中文语音长时间稳定性测试。
+4. 发布可重复构建的 arm64 侧载 APK。
+
+详细状态见 [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)，协作规则见 [AGENTS.md](AGENTS.md)。
+

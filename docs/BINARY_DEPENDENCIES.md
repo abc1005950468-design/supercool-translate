@@ -1,6 +1,12 @@
 # 二进制依赖
 
-首版远端源码不直接包含大体积二进制和模型缓存，避免 Git 历史过重。当前本地已验证依赖如下：
+首版远端源码不直接包含大体积二进制和模型缓存。固定版本依赖包已发布为 GitHub Release：`deps-3.5-v1`。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/fetch-dependencies.ps1
+```
+
+依赖文件如下：
 
 | 文件 | 用途 | 大小 |
 | --- | --- | ---: |
@@ -17,6 +23,5 @@
 powershell -ExecutionPolicy Bypass -File scripts/fetch-bundled-models.ps1
 ```
 
-## 待处理
-
-Issue #4 负责生成固定版本依赖包、SHA-256 清单和一键恢复脚本。完成前，新机器只能源码分析，完整 APK 构建需要原开发机的本地依赖。
+Release:
+https://github.com/abc1005950468-design/supercool-translate/releases/tag/deps-3.5-v1

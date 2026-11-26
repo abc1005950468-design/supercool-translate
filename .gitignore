@@ -25,3 +25,7 @@ android/app/libs/sherpa-onnx-no-ort.aar
 android/app/libs/sherpa-onnx.aar
 
 work/
+# Native/OCR binaries are restored by scripts/fetch-dependencies.ps1.
+android/app/libs/*.aar
+android/app/src/main/jniLibs/**/*.so
+android/app/src/main/assets/tessdata/*.traineddata
