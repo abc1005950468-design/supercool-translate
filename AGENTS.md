@@ -20,7 +20,12 @@
 ## 分支与任务
 
 - 分支名：`agent/<角色>/<短任务名>`。
-- 每个任务使用 GitHub Issue 或 `tasks/active/` 下的任务卡记录状态。
+- 执行状态统一在 [gonggui-task-center](https://github.com/abc1005950468-design/gonggui-task-center) 的中央 Issue 中维护，项目标签为 `project:supercool-translate`。
+- 领取前先读项目注册总览：[#26](https://github.com/abc1005950468-design/gonggui-task-center/issues/26)。
+- 源码仓 Issue 只记录产品问题；工作开始前必须先在中央 Issue 评论 `/claim <agent-id>`。
+- 中央任务号 `TASK-20261126-0011` ～ `0015` 对应 Issue `#21` ～ `#25`；映射以 `PROJECT_BOARD.md` 为准。
+- 执行中通过 `/progress` 写回，完成实现后用 `/submit <agent-id> <pr-url>` 进入 `status:review`。
+- `claude-vscode` 独立验收后，`codex-master` 做最终闸门；修复者不得自审。
 - 任务完成后更新 `docs/PROJECT_STATE.md` 的相关状态，但不要在多个文档重复同一事实。
 
 ## 验证门槛

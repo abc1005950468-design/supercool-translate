@@ -9,6 +9,38 @@
 - `vietnam-codex`：局部代码、测试、脚本
 - `doubao-archive`：证据整理与归档
 
+## 中央任务中心
+
+超酷翻译执行状态统一在
+[gonggui-task-center](https://github.com/abc1005950468-design/gonggui-task-center)
+维护，项目标签为 `project:supercool-translate`。
+
+源码仓 Issue 只记录产品问题；执行 Agent 必须先在中央 Issue 完成领取：
+
+```powershell
+python scripts/taskctl.py remote-list --label project:supercool-translate
+python scripts/taskctl.py remote-list --label status:ready
+python scripts/taskctl.py status --issue <number>
+python scripts/taskctl.py claim --issue <number> --agent <agent-id>
+```
+
+标准状态链路：
+
+```text
+status:ready
+→ /claim <agent-id>
+→ status:claimed
+→ status:fixing
+→ /progress
+→ /submit <agent-id> <pr-url>
+→ status:review
+→ claude-vscode verdict
+→ status:verified
+→ codex-master 最终闸门
+```
+
+当前映射为 `TASK-20261126-0011`～`0015` 对应中央 Issue `#21`～`#25`；完整表格见 `PROJECT_BOARD.md`。源码仓 Issue 可以作为证据链接，但不能作为领取或验收状态源。
+
 ## 标准任务卡
 
 必须包含：
