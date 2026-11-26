@@ -48,7 +48,7 @@ fun ProviderSettingsDialog(
     downloads: Map<String, DownloadState>,
     onDismiss: () -> Unit,
     onSave: (ProviderConfig) -> Unit,
-    onCloudChange: (CloudConfig) -> Unit,
+    onCloudChange: (CloudConfig, Boolean) -> Boolean,
     onDownload: (ModelPack) -> Unit,
     onDownloadRecommended: () -> Unit,
     onImport: (ModelPack) -> Unit,
@@ -69,19 +69,21 @@ fun ProviderSettingsDialog(
     var apiKey by remember { mutableStateOf(initial.cloud.apiKey) }
     var chatModel by remember { mutableStateOf(initial.cloud.chatModel) }
 
+    var apiKeyError by remember { mutableStateOf(false) }
+
     fun saveCloudDraft(
         nextBaseUrl: String = baseUrl,
-        nextApiKey: String = apiKey,
+        nextApiKey: String = "",
         nextChatModel: String = chatModel,
-    ) {
-        onCloudChange(
-            initial.cloud.copy(
-                baseUrl = nextBaseUrl.trim(),
-                apiKey = nextApiKey.trim(),
-                chatModel = nextChatModel.trim(),
-            )
-        )
-    }
+        clearApiKey: Boolean = false,
+    ): Boolean = onCloudChange(
+        initial.cloud.copy(
+            baseUrl = nextBaseUrl.trim(),
+            apiKey = nextApiKey.trim(),
+            chatModel = nextChatModel.trim(),
+        ),
+        clearApiKey,
+    )
 
     val mtPacks = ModelCatalog.all.filter { it.kind == ModelKind.LLM || it.kind == ModelKind.MT }
     val asrPacks = ModelCatalog.all.filter { it.kind == ModelKind.ASR }
@@ -225,16 +227,26 @@ fun ProviderSettingsDialog(
                                             value = apiKey,
                                             onValueChange = {
                                                 apiKey = it
-                                                saveCloudDraft(nextApiKey = it)
+                                                apiKeyError = it.isNotBlank() && !saveCloudDraft(nextApiKey = it)
                                             },
                                             label = { Text("API Key") },
                                             visualTransformation = PasswordVisualTransformation(),
+                                            isError = apiKeyError,
                                             singleLine = true,
                                             supportingText = {
-                                                Text("输入后自动加密保存在本机")
+                                                Text(
+                                                    if (apiKeyError) "无法写入本机加密存储"
+                                                    else "输入后自动加密保存，点按下方按钮可清除",
+                                                )
                                             },
                                             modifier = Modifier.fillMaxWidth(),
                                         )
+                                        TextButton(
+                                            onClick = {
+                                                apiKeyError = !saveCloudDraft(clearApiKey = true)
+                                                if (!apiKeyError) apiKey = ""
+                                            },
+                                        ) { Text("清除 API Key") }
                                         OutlinedTextField(
                                             value = chatModel,
                                             onValueChange = {
@@ -448,7 +460,7 @@ fun ProviderSettingsDialog(
                                     languageRoute = languageRoute,
                                     cloud = initial.cloud.copy(
                                         baseUrl = baseUrl.trim(),
-                                        apiKey = apiKey.trim(),
+                                        apiKey = "",
                                         chatModel = chatModel.trim(),
                                     ),
                                 )

@@ -380,7 +380,11 @@ class LiveViewModel(application: Application) : AndroidViewModel(application) {
         if (_state.value.running) stop()
         cancelTranslations()
         val previous = providerConfig
-        val next = withAi(config)
+        val requestedKey = config.cloud.apiKey.trim()
+        val keySaved = requestedKey.isEmpty() || requestedKey == previous.cloud.apiKey ||
+            providerStore.saveApiKey(requestedKey)
+        val apiKey = if (keySaved && requestedKey.isNotEmpty()) requestedKey else previous.cloud.apiKey
+        val next = withAi(config.copy(cloud = config.cloud.copy(apiKey = apiKey)))
         providerConfig = next
         providerStore.save(providerConfig)
         val cloudChanged = next.mt != com.mine.offlinetranslate.core.MtMode.LOCAL_LLM &&
@@ -433,17 +437,36 @@ class LiveViewModel(application: Application) : AndroidViewModel(application) {
         _state.update {
             it.copy(
                 providerConfig = providerConfig,
-                error = null,
+                error = if (keySaved) null else "无法写入本机加密存储中的 API Key",
                 partial = "",
                 partialTranslation = "",
             )
         }
     }
 
-    fun updateCloudSettings(cloud: com.mine.offlinetranslate.core.CloudConfig) {
-        providerConfig = providerConfig.copy(cloud = cloud)
+    fun updateCloudSettings(cloud: com.mine.offlinetranslate.core.CloudConfig, clearApiKey: Boolean): Boolean {
+        val previous = providerConfig.cloud
+        val requestedKey = cloud.apiKey.trim()
+        val apiKey = when {
+            clearApiKey -> {
+                if (!providerStore.clearApiKey()) return false
+                ""
+            }
+            requestedKey.isNotEmpty() -> {
+                if (!providerStore.saveApiKey(requestedKey)) return false
+                requestedKey
+            }
+            else -> previous.apiKey
+        }
+        val next = previous.copy(baseUrl = cloud.baseUrl, apiKey = apiKey, chatModel = cloud.chatModel)
+        providerConfig = providerConfig.copy(cloud = next)
         providerStore.save(providerConfig)
+        if (previous != next && providerConfig.mt == com.mine.offlinetranslate.core.MtMode.CLOUD) {
+            cancelTranslations()
+            rebuildTranslator()
+        }
         _state.update { it.copy(providerConfig = providerConfig) }
+        return true
     }
 
     fun downloadModel() {
