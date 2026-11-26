@@ -44,6 +44,20 @@ gradle -p android testDebugUnitTest assembleDebug
 
 主要 APK 输出位于 `android/app/build/outputs/apk/debug/app-debug.apk`。
 
+## 共轨任务中心
+
+执行状态统一在私有任务中心
+[gonggui-task-center](https://github.com/abc1005950468-design/gonggui-task-center) 管理：
+
+- 项目标签：`project:supercool-translate`
+- 项目注册总览：[#26](https://github.com/abc1005950468-design/gonggui-task-center/issues/26)
+- 中央任务：`TASK-20261126-0011` ～ `0015`
+- 中央 Issue：[#21](https://github.com/abc1005950468-design/gonggui-task-center/issues/21) ～ [#25](https://github.com/abc1005950468-design/gonggui-task-center/issues/25)
+- 源码仓 Issue 只记录产品问题；`/claim`、`/progress`、`/submit` 和独立验收只在中央 Issue 执行
+- 领取入口：`python scripts/taskctl.py remote-list --label project:supercool-translate`
+
+完整规则见 [PROJECT_BOARD.md](PROJECT_BOARD.md) 和 [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md)。
+
 ## 当前优先事项
 
 1. 修复 Nubia NX769J 上本地 NLLB 单句翻译触发系统 `SIGKILL` 的问题。
