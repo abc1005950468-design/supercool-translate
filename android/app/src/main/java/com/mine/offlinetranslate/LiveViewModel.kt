@@ -461,7 +461,7 @@ class LiveViewModel(application: Application) : AndroidViewModel(application) {
         val next = previous.copy(baseUrl = cloud.baseUrl, apiKey = apiKey, chatModel = cloud.chatModel)
         providerConfig = providerConfig.copy(cloud = next)
         providerStore.save(providerConfig)
-        if (previous != next && providerConfig.mt == com.mine.offlinetranslate.core.MtMode.CLOUD) {
+        if (clearApiKey && providerConfig.mt == com.mine.offlinetranslate.core.MtMode.CLOUD) {
             cancelTranslations()
             rebuildTranslator()
         }
