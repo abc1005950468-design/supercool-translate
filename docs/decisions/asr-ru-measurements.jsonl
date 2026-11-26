@@ -1,0 +1,4 @@
+{"engine": "ru-small-streaming", "wav": "0.wav", "audio_s": 9.24, "first_partial_s": 0.162, "first_partial": "я", "total_s": 0.286, "text": "я тебя люблю"}
+{"engine": "ru-small-streaming", "wav": "1.wav", "audio_s": 7.08, "first_partial_s": 0.022, "first_partial": "родион", "total_s": 0.217, "text": "родион потапыч высчитывал каждый новый вершок углубления и давно определил про себя"}
+{"engine": "whisper-small-int8", "wav": "0.wav", "audio_s": 9.24, "load_s": 1.82, "decode_s": 1.054, "rtf": 0.114, "text": "Я тебя люблю."}
+{"engine": "whisper-small-int8", "wav": "1.wav", "audio_s": 7.08, "load_s": 1.84, "decode_s": 2.061, "rtf": 0.291, "text": "Родион Потапыч высчитывал каждый новый вершок углубления и давно определил про себя"}

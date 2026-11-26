@@ -1,0 +1,82 @@
+package com.mine.offlinetranslate.core
+
+data class LanguageOption(
+    val code: String,
+    val label: String,
+    val asrSupported: Boolean,
+)
+
+object Languages {
+    val all = listOf(
+        LanguageOption("zh", "中文", true),
+        LanguageOption("en", "英语", true),
+        LanguageOption("ru", "俄语", true),
+        LanguageOption("ja", "日语", false),
+        LanguageOption("ko", "韩语", false),
+        LanguageOption("de", "德语", false),
+        LanguageOption("fr", "法语", false),
+        LanguageOption("es", "西班牙语", false),
+        LanguageOption("it", "意大利语", false),
+        LanguageOption("pt", "葡萄牙语", false),
+        LanguageOption("ar", "阿拉伯语", false),
+        LanguageOption("hi", "印地语", false),
+        LanguageOption("th", "泰语", false),
+        LanguageOption("vi", "越南语", false),
+        LanguageOption("id", "印尼语", false),
+        LanguageOption("ms", "马来语", false),
+        LanguageOption("tr", "土耳其语", false),
+        LanguageOption("nl", "荷兰语", false),
+        LanguageOption("pl", "波兰语", false),
+        LanguageOption("sv", "瑞典语", false),
+        LanguageOption("da", "丹麦语", false),
+        LanguageOption("no", "挪威语", false),
+        LanguageOption("fi", "芬兰语", false),
+        LanguageOption("hu", "匈牙利语", false),
+        LanguageOption("cs", "捷克语", false),
+        LanguageOption("sk", "斯洛伐克语", false),
+        LanguageOption("bg", "保加利亚语", false),
+        LanguageOption("hr", "克罗地亚语", false),
+        LanguageOption("sr", "塞尔维亚语", false),
+        LanguageOption("ro", "罗马尼亚语", false),
+        LanguageOption("lt", "立陶宛语", false),
+        LanguageOption("lv", "拉脱维亚语", false),
+        LanguageOption("et", "爱沙尼亚语", false),
+        LanguageOption("el", "希腊语", false),
+        LanguageOption("he", "希伯来语", false),
+        LanguageOption("uk", "乌克兰语", false),
+        LanguageOption("fa", "波斯语", false),
+        LanguageOption("ur", "乌尔都语", false),
+        LanguageOption("bn", "孟加拉语", false),
+        LanguageOption("ta", "泰米尔语", false),
+        LanguageOption("te", "泰卢固语", false),
+        LanguageOption("ml", "马拉雅拉姆语", false),
+        LanguageOption("kn", "卡纳达语", false),
+        LanguageOption("gu", "古吉拉特语", false),
+        LanguageOption("mr", "马拉地语", false),
+        LanguageOption("ne", "尼泊尔语", false),
+        LanguageOption("si", "僧伽罗语", false),
+        LanguageOption("km", "高棉语", false),
+        LanguageOption("lo", "老挝语", false),
+        LanguageOption("my", "缅甸语", false),
+        LanguageOption("mn", "蒙古语", false),
+        LanguageOption("kk", "哈萨克语", false),
+        LanguageOption("uz", "乌兹别克语", false),
+        LanguageOption("az", "阿塞拜疆语", false),
+        LanguageOption("ka", "格鲁吉亚语", false),
+        LanguageOption("hy", "亚美尼亚语", false),
+        LanguageOption("be", "白俄罗斯语", false),
+        LanguageOption("bs", "波斯尼亚语", false),
+        LanguageOption("mk", "马其顿语", false),
+        LanguageOption("is", "冰岛语", false),
+        LanguageOption("ga", "爱尔兰语", false),
+        LanguageOption("mt", "马耳他语", false),
+        LanguageOption("lb", "卢森堡语", false),
+        LanguageOption("yue", "粤语", false),
+    )
+
+    fun label(code: String): String =
+        all.firstOrNull { it.code == code }?.label ?: code.uppercase()
+
+    fun asrSupported(code: String): Boolean =
+        all.firstOrNull { it.code == code }?.asrSupported == true
+}

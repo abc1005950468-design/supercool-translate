@@ -1,0 +1,27 @@
+android/.gradle/
+android/build/
+android/app/build/
+android/.kotlin/
+android/local.properties
+android/app/.cxx/
+android/app/.cxx.*/
+work/models/
+work/venv-sherpa/
+work/tmp/
+work/dsh-home/
+work/screenshots/
+android/app/src/main/assets/models/
+*.apk
+*.zip
+.playwright-cli/
+.handoff/
+-
+local.properties
+
+# Large prebuilt variants not used by the current build.
+android/app/libs/onnxruntime-android-1.28.0.aar
+android/app/libs/onnxruntime-android-1.28.0-no-core.aar
+android/app/libs/sherpa-onnx-no-ort.aar
+android/app/libs/sherpa-onnx.aar
+
+work/

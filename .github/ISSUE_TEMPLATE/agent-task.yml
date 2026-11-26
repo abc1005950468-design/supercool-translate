@@ -1,0 +1,50 @@
+name: Agent task
+description: 为共轨 Agent 创建可验收任务
+title: "[Agent] "
+labels: ["status:ready"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标
+      description: 用户可见结果是什么？
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 当前证据
+      description: 日志、截图、退出原因、复现命令
+    validations:
+      required: true
+  - type: input
+    id: writer
+    attributes:
+      label: 唯一写者
+      placeholder: vietnam-codex / claude-vscode / codex-master
+    validations:
+      required: true
+  - type: textarea
+    id: allowed
+    attributes:
+      label: 允许修改路径
+    validations:
+      required: true
+  - type: textarea
+    id: forbidden
+    attributes:
+      label: 禁止修改路径
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收命令与标准
+    validations:
+      required: true
+  - type: textarea
+    id: rollback
+    attributes:
+      label: 回滚方式
+    validations:
+      required: true
