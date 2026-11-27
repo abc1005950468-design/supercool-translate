@@ -2,39 +2,94 @@ param([switch]$Force)
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$url = "https://github.com/abc1005950468-design/supercool-translate/releases/download/deps-3.5-v1/supercool-translate-deps-3.5-v1.zip"
-$tmp = Join-Path ([System.IO.Path]::GetTempPath()) "supercool-translate-deps-3.5-v1.zip"
-$extract = Join-Path ([System.IO.Path]::GetTempPath()) "supercool-translate-deps-3.5-v1"
+$repo = "abc1005950468-design/supercool-translate"
+$url = "https://github.com/$repo/releases/download/deps-3.5-v1/supercool-translate-deps-3.5-v1.zip"
+$archiveHash = "5f9ebb325298f639ed2ed25678620de0bbc7697b0ae412577e51912dd127165e"
 
-if ($Force -or -not (Test-Path $tmp)) {
-  Write-Host "Downloading dependency bundle..."
-  Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing
+$files = [ordered]@{
+  "sherpa-onnx-jni.aar" = "android/app/libs/sherpa-onnx-jni.aar"
+  "tesseract4android-openmp-4.9.0.aar" = "android/app/libs/tesseract4android-openmp-4.9.0.aar"
+  "jniLibs/arm64-v8a/libonnxruntime.so" = "android/app/src/main/jniLibs/arm64-v8a/libonnxruntime.so"
+  "jniLibs/x86_64/libonnxruntime.so" = "android/app/src/main/jniLibs/x86_64/libonnxruntime.so"
+  "tessdata/chi_sim.traineddata" = "android/app/src/main/assets/tessdata/chi_sim.traineddata"
+  "tessdata/rus.traineddata" = "android/app/src/main/assets/tessdata/rus.traineddata"
 }
 
-if (Test-Path $extract) { Remove-Item -LiteralPath $extract -Recurse -Force }
-New-Item -ItemType Directory -Force -Path $extract | Out-Null
-Expand-Archive -LiteralPath $tmp -DestinationPath $extract -Force
+$gitDir = git -C $root rev-parse --absolute-git-dir
+if ($LASTEXITCODE -ne 0) { throw "Cannot locate Git metadata for dependency staging." }
+$stage = Join-Path $gitDir ("dependency-restore-" + [guid]::NewGuid())
+$zip = Join-Path $stage "dependencies.zip"
+$extract = Join-Path $stage "extracted"
+$cache = Join-Path $gitDir "supercool-translate-deps-3.5-v1.zip"
+$client = New-Object Net.WebClient
+$client.Proxy = $null
+$client.Headers["User-Agent"] = "supercool-translate-dependency-restore"
+try {
+  New-Item -ItemType Directory -Path $stage | Out-Null
+  if (-not $Force -and (Test-Path -LiteralPath $cache) -and
+      (Get-FileHash -Algorithm SHA256 -LiteralPath $cache).Hash -eq $archiveHash) {
+    Copy-Item -LiteralPath $cache -Destination $zip
+  } else {
+    Write-Host "Downloading dependency bundle..."
+    $token = $env:GH_TOKEN
+    if (-not $token) { $token = $env:GITHUB_TOKEN }
+    if ($token) {
+      # Resolve the signed asset URL without forwarding GitHub credentials to the CDN.
+      $request = [Net.HttpWebRequest]::Create("https://api.github.com/repos/$repo/releases/assets/796266618")
+      $request.Proxy = $null
+      $request.UserAgent = "supercool-translate-dependency-restore"
+      $request.Accept = "application/octet-stream"
+      $request.Headers["Authorization"] = "Bearer $token"
+      $request.AllowAutoRedirect = $false
+      $response = $request.GetResponse()
+      try {
+        if ([int]$response.StatusCode -ne 302) { throw "GitHub did not return a release asset redirect." }
+        $assetUrl = [uri]$response.Headers["Location"]
+        if ($assetUrl.Scheme -ne "https") { throw "GitHub release asset redirect must use HTTPS." }
+      } finally {
+        $response.Dispose()
+      }
+      try { $client.DownloadFile($assetUrl, $zip) } catch {
+        $reason = $_.Exception.GetBaseException()
+        if ($reason -is [Net.WebException] -and $reason.Response) {
+          throw "GitHub release asset download failed (HTTP $([int]$reason.Response.StatusCode))."
+        }
+        throw "GitHub release asset download failed ($($reason.GetType().Name))."
+      }
+    } else {
+      $client.DownloadFile($url, $zip)
+    }
+  }
+  if ((Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash -ne $archiveHash) {
+    throw "Dependency bundle SHA-256 mismatch."
+  }
+  Write-Host "Dependency bundle SHA-256 verified: $archiveHash"
+  Expand-Archive -LiteralPath $zip -DestinationPath $extract
 
-$libs = Join-Path $root "android/app/libs"
-$jni = Join-Path $root "android/app/src/main/jniLibs"
-$tess = Join-Path $root "android/app/src/main/assets/tessdata"
-New-Item -ItemType Directory -Force -Path $libs,(Join-Path $jni "arm64-v8a"),(Join-Path $jni "x86_64"),$tess | Out-Null
+  $hashes = @{}
+  foreach ($line in Get-Content -LiteralPath (Join-Path $extract "SHA256SUMS.txt")) {
+    if ($line -match '^([0-9A-Fa-f]{64})\s+(.+)$') {
+      $relativePath = $Matches[2].Replace('\', '/')
+      if ($hashes.ContainsKey($relativePath)) { throw "Duplicate SHA-256 entry: $relativePath" }
+      $hashes[$relativePath] = $Matches[1]
+    }
+  }
 
-Copy-Item -LiteralPath (Join-Path $extract "sherpa-onnx-jni.aar") -Destination (Join-Path $libs "sherpa-onnx-jni.aar") -Force
-Copy-Item -LiteralPath (Join-Path $extract "tesseract4android-openmp-4.9.0.aar") -Destination (Join-Path $libs "tesseract4android-openmp-4.9.0.aar") -Force
-Copy-Item -LiteralPath (Join-Path $extract "jniLibs/arm64-v8a/libonnxruntime.so") -Destination (Join-Path $jni "arm64-v8a/libonnxruntime.so") -Force
-Copy-Item -LiteralPath (Join-Path $extract "jniLibs/x86_64/libonnxruntime.so") -Destination (Join-Path $jni "x86_64/libonnxruntime.so") -Force
-Copy-Item -LiteralPath (Join-Path $extract "tessdata/chi_sim.traineddata") -Destination (Join-Path $tess "chi_sim.traineddata") -Force
-Copy-Item -LiteralPath (Join-Path $extract "tessdata/rus.traineddata") -Destination (Join-Path $tess "rus.traineddata") -Force
-
-$sumFile = Join-Path $extract "SHA256SUMS.txt"
-foreach ($line in Get-Content -LiteralPath $sumFile) {
-  if ($line -notmatch '^([0-9A-Fa-f]{64})\s+(.+)$') { continue }
-  $expected = $Matches[1].ToUpperInvariant()
-  $rel = $Matches[2].Replace('/', [IO.Path]::DirectorySeparatorChar)
-  $target = Join-Path $extract $rel
-  $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $target).Hash.ToUpperInvariant()
-  if ($actual -ne $expected) { throw "SHA-256 mismatch: $rel" }
+  foreach ($relativePath in $files.Keys) {
+    $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $extract $relativePath)).Hash
+    if ($actual -ne $hashes[$relativePath]) { throw "Missing or mismatched SHA-256: $relativePath" }
+    Write-Host "SHA-256 verified: $relativePath $actual"
+  }
+  foreach ($relativePath in $files.Keys) {
+    $destination = Join-Path $root $files[$relativePath]
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+    Copy-Item -LiteralPath (Join-Path $extract $relativePath) -Destination $destination -Force
+  }
+  Copy-Item -LiteralPath $zip -Destination $cache -Force
+  Write-Host "Native and OCR dependencies restored."
+} finally {
+  $client.Dispose()
+  if (Test-Path -LiteralPath $stage) {
+    [IO.Directory]::Delete($stage, $true)
+  }
 }
-
-Write-Host "Native and OCR dependencies restored."
